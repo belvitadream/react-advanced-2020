@@ -1,9 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 
-const url = 'https://api.github.com/users';
+const url = 'https://api.github.com/users'
 
 const UseEffectFetchData = () => {
-  return <h2>fetch data</h2>;
-};
+  const [users, setUsers] = useState([])
 
-export default UseEffectFetchData;
+  const getUsers = async () => {
+    const response = await fetch(url)
+    const users = await response.json()
+    setUsers(users)
+    // infinite loop Cause this triggers re-render. So we need add empty dependency list as second argument
+    // we if we trigger re-render, there should always be an empty dependency array in useEffect
+  }
+
+  // hooks cannot be async. So we need to make separate function
+  useEffect(() => {
+    getUsers()
+  }, [])
+
+  return (
+    <>
+      <h3>Github users</h3>
+
+      <ul className='users'>
+        {users.map((user) => {
+          const { id, login, avatar_url, html_url } = user
+          return (
+            <li key={id}>
+              <img src={avatar_url} alt={login} />
+              <div>
+                <h4>{login}</h4>
+                <a href={html_url}>profile</a>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </>
+  )
+}
+
+export default UseEffectFetchData

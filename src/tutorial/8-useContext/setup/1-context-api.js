@@ -1,46 +1,54 @@
-import React, { useState, useContext } from 'react';
-import { data } from '../../../data';
+import React, { useState, useContext } from 'react'
+import { data } from '../../../data'
 // more components
 // fix - context api, redux (for more complex cases)
 
+// when we have 2-3 levels deep.
+
+// step 1. Create Context
+const PersonContext = React.createContext()
+// you get two components: Provider (works as distributer), Consumer (as a getter)
+
 const ContextAPI = () => {
-  const [people, setPeople] = useState(data);
+  const [people, setPeople] = useState(data)
   const removePerson = (id) => {
     setPeople((people) => {
-      return people.filter((person) => person.id !== id);
-    });
-  };
+      return people.filter((person) => person.id !== id)
+    })
+  }
+  // Step 2. Wrap the top whole component into Provider. this Provider needs to wrap the whole component tree
+  // we pass this function as part of the object. We can pass like function, but better inside the object {}
   return (
-    <>
-      <h3>prop drilling</h3>
-      <List people={people} removePerson={removePerson} />
-    </>
-  );
-};
+    <PersonContext.Provider value={{ removePerson, people }}>
+      <h3>Context API / UseContext</h3>
+      <List />
+    </PersonContext.Provider>
+  )
+}
 
-const List = ({ people, removePerson }) => {
+const List = () => {
+  const mainData = useContext(PersonContext)
+
   return (
     <>
-      {people.map((person) => {
-        return (
-          <SinglePerson
-            key={person.id}
-            {...person}
-            removePerson={removePerson}
-          />
-        );
+      {mainData.people.map((person) => {
+        return <SinglePerson key={person.id} {...person} />
       })}
     </>
-  );
-};
+  )
+}
 
-const SinglePerson = ({ id, name, removePerson }) => {
+const SinglePerson = ({ id, name }) => {
+  // step 3. Extract data from useContext
+  // we destructure our function from the value argument of the Context
+
+  const { removePerson } = useContext(PersonContext)
   return (
     <div className='item'>
       <h4>{name}</h4>
       <button onClick={() => removePerson(id)}>remove</button>
     </div>
-  );
-};
+  )
+}
 
-export default ContextAPI;
+export default ContextAPI
